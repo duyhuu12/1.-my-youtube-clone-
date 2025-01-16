@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm kiếm video Youtube</title>
+  <style>
+    /* ------------ RESET STYLES ------------ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    /* ------------ HEADER ------------ */
+    h1 {
+      background-color: #ff0000;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      font-size: 2.5em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    /* ------------ INPUT + BUTTON ------------ */
+    input {
+      padding: 12px;
+      width: 70%;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #ff0000;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #cc0000;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* ------------ PLAYER SECTION ------------ */
+#player-section {
+  margin-top: 20px;
+  text-align: left;  /* Căn trái */
+  padding-left: 20px;  /* Thêm khoảng cách từ lề trái */
+}
+
+#video-player {
+  width: 100%;
+  max-width: 720px;
+  height: 405px;
+  margin: 20px 0;
+  display: block;
+  border: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+    /* ------------ VIDEO LIST ------------ */
+    .video-list {
+  flex-grow: 1; /* Chiếm không gian còn lại */
+  padding: 20px;
+}
+#video-player {
+  max-width: 50%; /* Đảm bảo video không quá rộng */
+  margin: 0;
+}
+
+    /* ------------ LAYOUT BUTTONS ------------ */
+    .video-item button {
+      width: 80%;
+      margin: 5px 0;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    /* ------------ PLAYLIST ------------ */
+    .playlist {
+      background-color: #fff;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 6px;
+      max-width: 800px;
+      margin: 20px auto;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .playlist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .playlist-item:last-child {
+      border-bottom: none;
+    }
+
+    .playlist-item p {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .playlist-item button {
+      padding: 8px;
+      font-size: 14px;
+      margin-left: 5px;
+      background-color: #ff0000;
+      color: white;
+    }
+
+    .playlist-item button:hover {
+      background-color: #cc0000;
+    }
+
+    /* ------------ RESPONSIVENESS ------------ */
+    @media (max-width: 768px) {
+      input {
+        width: 90%;
+      }
+
+      .video-item {
+        width: 100%;
+      }
+
+      #video-player {
+        width: 100%;
+        max-width: unset;
+      }
+
+      .playlist {
+        width: calc(100% - 40px);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Tìm kiếm video Youtube</h1>
+
+  <!-- Search Section -->
+  <input type="text" id="search-input" placeholder="Nhập từ khóa tìm kiếm...">
+  <button onclick="searchVideos()">Tìm kiếm</button>
+
+  <!-- Now Playing -->
+  <div id="player-section">
+    <h2 id="now-playing-title">Chưa phát video nào</h2>
+    <iframe id="video-player" src="" allowfullscreen></iframe>
+  </div>
+
+  <!-- Video Results -->
+  <div class="video-list" id="video-list"></div>
+
+  <!-- Playlist -->
+  <div class="playlist">
+    <h2>Danh sách phát</h2>
+    <div id="playlist"></div>
+  </div>
+<script>
+ const API_KEY = 'AIzaSyAM7MDH2G_cSWdy4WxzieXXRPFe7y3ktq0'; // Thay bằng API Key của bạn
+    const BASE_URL = 'https://www.googleapis.com/youtube/v3';
+
+    // Hàm tìm kiếm video
+    async function searchVideos() {
+      const query = document.getElementById('search-input').value;
+      if (!query) {
+        alert('Vui lòng nhập từ khóa!');
+        return;
+      }
+
+      const url = `${BASE_URL}/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      // Hiển thị video tìm được
+      displayVideos(data.items);
+    }
+
+    // Hàm hiển thị các video
+    function displayVideos(videos) {
+      const videoList = document.getElementById('video-list');
+      videoList.innerHTML = '';
+
+      videos.forEach((video) => {
+        const videoId = video.id.videoId;
+        const title = video.snippet.title;
+        const thumbnail = video.snippet.thumbnails.default.url;
+
+        const videoItem = document.createElement('div');
+        videoItem.className = 'video-item';
+        videoItem.innerHTML = `
+          <img src="${thumbnail}" alt="${title}">
+          <p>${title}</p>
+          <button onclick="playVideo('${videoId}', '${title}')">Phát</button>
+          <button onclick="addToPlaylist('${videoId}', '${title}')">Thêm vào danh sách phát</button>
+        `;
+        videoList.appendChild(videoItem);
+      });
+    }
+
+    // Khu vực hiển thị video
+    const videoPlayer = document.getElementById('video-player');
+    const nowPlayingTitle = document.getElementById('now-playing-title');
+
+    // Hàm phát video
+    function playVideo(videoId, title) {
+      videoPlayer.src = `https://www.youtube.com/embed/${videoId}`;
+      nowPlayingTitle.textContent = `Đang phát: ${title}`;
+    }
+    // Thêm sự kiện để tìm kiếm khi nhấn Enter
+    document.getElementById('search-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      searchVideos();
+    }
+     });
+
+    // Danh sách phát
+    const playlist = [];
+    const playlistElement = document.getElementById('playlist');
+
+    // Hàm thêm video vào danh sách phát
+    function addToPlaylist(videoId, title) {
+      playlist.push({ videoId, title });
+      renderPlaylist();
+    }
+
+    // Hàm hiển thị danh sách phát
+    function renderPlaylist() {
+      playlistElement.innerHTML = '';
+      playlist.forEach((video, index) => {
+        const playlistItem = document.createElement('div');
+        playlistItem.className = 'playlist-item';
+        playlistItem.innerHTML = `
+          <p>${video.title}</p>
+          <button onclick="playVideo('${video.videoId}', '${video.title}')">Phát</button>
+          <button onclick="removeFromPlaylist(${index})">Xóa</button>
+        `;
+        playlistElement.appendChild(playlistItem);
+      });
+    }
+
+    // Hàm xóa video khỏi danh sách phát
+    function removeFromPlaylist(index) {
+      playlist.splice(index, 1);
+      renderPlaylist();
+    }
+  </script>
+</body>
+</html>

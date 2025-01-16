@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh Sách Phát YouTube</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background-color: #ff0000;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #cc0000;
+    }
+    .video-list {
+      margin: 20px 0;
+    }
+    .video-item {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Danh Sách Phát YouTube</h1>
+  <input type="text" id="search-input" placeholder="Nhập từ khóa tìm kiếm...">
+  <button onclick="searchVideos()">Tìm kiếm</button>
+
+  <div class="video-list" id="video-list"></div>
+
+  <script>
+    const API_KEY = 'AIzaSyAM7MDH2G_cSWdy4WxzieXXRPFe7y3ktq0'; // Thay bằng API Key của bạn
+    const BASE_URL = 'https://www.googleapis.com/youtube/v3';
+
+    // Hàm tìm kiếm video
+    async function searchVideos() {
+      const query = document.getElementById('search-input').value;
+      if (!query) {
+        alert('Vui lòng nhập từ khóa!');
+        return;
+      }
+
+      const url = `${BASE_URL}/search?part=snippet&type=video&maxResults=10&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      // Hiển thị video tìm được
+      displayVideos(data.items);
+    }
+
+    // Hàm hiển thị các video
+    function displayVideos(videos) {
+      const videoList = document.getElementById('video-list');
+      videoList.innerHTML = '';
+
+      videos.forEach((video) => {
+        const videoId = video.id.videoId;
+        const title = video.snippet.title;
+        const thumbnail = video.snippet.thumbnails.default.url;
+
+        const videoItem = document.createElement('div');
+        videoItem.className = 'video-item';
+        videoItem.innerHTML = `
+          <img src="${thumbnail}" alt="${title}">
+          <p>${title}</p>
+          <button onclick="addToPlaylist('${videoId}', '${title}')">Thêm vào danh sách phát</button>
+        `;
+        videoList.appendChild(videoItem);
+      });
+    }
+
+    // Danh sách phát
+    const playlist = [];
+
+    // Hàm thêm video vào danh sách phát
+    function addToPlaylist(videoId, title) {
+      playlist.push({ videoId, title });
+      alert(`Đã thêm "${title}" vào danh sách phát!`);
+      console.log('Danh sách phát hiện tại:', playlist);
+    }
+  </script>
+
+</body>
+</html>
